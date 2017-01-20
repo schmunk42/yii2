@@ -14,6 +14,7 @@ after_script:
 stages:
   - build
   - test
+  - test-db
   - cleanup
 
 build:
@@ -25,7 +26,7 @@ test:
   stage: test
   script:
     - docker-compose up -d
-    - docker-compose run --rm php vendor/bin/phpunit -v --exclude caching,db
+    - docker-compose run --rm php vendor/bin/phpunit -v --exclude caching,db,data --log-junit tests/_junit/test.xml
     - docker-compose down -v --remove-orphans
 
 test:caching:

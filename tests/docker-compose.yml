@@ -38,4 +38,5 @@ networks:
     ipam:
       driver: default
       config:
+        # prevent overlapping/duplicated networks, since docker assigns /16 subnets by default ranging from 10.x over 172.x to 192.168.x
         - subnet: 10.100.1${TUPLE_C}.1/24
