@@ -11,6 +11,9 @@ before_script:
 after_script:
   - export ISOLATION=buildpipeline${CI_PIPELINE_ID}${CI_BUILD_NAME}
   - export COMPOSE_PROJECT_NAME=${ISOLATION}
+  # run docker-compose commands from tests environment
+  - cd tests
+  - cp .env-dist .env
   - docker-compose down -v --remove-orphans
   - docker ps -f name=${ISOLATION}
 
@@ -30,14 +33,11 @@ caching:
   script:
     - export COMPOSE_FILE=docker-compose.yml:docker-compose.${CI_BUILD_NAME}.yml
     - docker-compose up --build -d
-    # wait for mysql (retry 30 times)
-    - docker-compose run --rm php bash -c "while ! curl mysql:3306; do ((c++)) && ((c==30)) && break; sleep 2; done"
     - docker-compose run --rm php vendor/bin/phpunit -v --group caching --exclude db
 
 db:
   stage: test
   script:
-    - export COMPOSE_PROJECT_NAME=${ISOLATION}db
     - docker-compose up --build -d
     - docker-compose run --rm php vendor/bin/phpunit -v --group db --exclude caching,mysql,pgsql,mssql,cubrid
     - docker-compose down -v --remove-orphans
@@ -45,7 +45,6 @@ db:
 mysql:
   stage: test
   script:
-    - export COMPOSE_PROJECT_NAME=${ISOLATION}mysql
     - export COMPOSE_FILE=docker-compose.yml:docker-compose.${CI_BUILD_NAME}.yml
     - docker-compose up --build -d
     # wait for db (retry X times)
@@ -56,7 +55,6 @@ mysql:
 pgsql:
   stage: test
   script:
-    - export COMPOSE_PROJECT_NAME=${ISOLATION}pgsql
     - export COMPOSE_FILE=docker-compose.yml:docker-compose.${CI_BUILD_NAME}.yml
     - docker-compose up --build -d
     # wait for db (retry X times)
@@ -70,7 +68,6 @@ mssql:
     - tests/mssql
   script:
     - cd mssql
-    - export COMPOSE_PROJECT_NAME=${ISOLATION}mssql
     # TODO: retry/wait for db
     - docker-compose up --build -d
     # wait for db (retry X times)
@@ -87,7 +84,6 @@ cubrid:
     - tests/cubrid
   script:
     - cd cubrid
-    - export COMPOSE_PROJECT_NAME=${ISOLATION}cubrid
     - docker-compose up --build -d
     # wait for db (retry X times)
     - docker-compose run --rm php bash -c 'while [ true ]; do curl cubrid:1523; if [ $? == 56 ]; then break; fi; ((c++)) && ((c==20)) && break; sleep 3; done'
