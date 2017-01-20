@@ -1,17 +1,18 @@
 before_script:
-  # run docker-compose commands from tests environment
-  - cd tests
   # set stack isolation
   - export ISOLATION=buildpipeline${CI_PIPELINE_ID}${CI_BUILD_NAME}
   - export COMPOSE_PROJECT_NAME=${ISOLATION}
   - export TUPLE_C=$(expr ${CI_BUILD_ID} % 99)
   - echo ${TUPLE_C}
+  # run docker-compose commands from tests environment
+  - cd tests
+  - cp .env-dist .env
 
 after_script:
   - export ISOLATION=buildpipeline${CI_PIPELINE_ID}${CI_BUILD_NAME}
   - export COMPOSE_PROJECT_NAME=${ISOLATION}
-  - docker ps -f name=${ISOLATION}
   - docker-compose down -v --remove-orphans
+  - docker ps -f name=${ISOLATION}
 
 stages:
   - travis
