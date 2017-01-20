@@ -1,4 +1,4 @@
-FROM codemix/yii2-base:2.0-apache
+FROM dmstr/php-yii2:7.0-fpm-1.8
 
 # Install system packages for PHP extensions recommended for Yii 2.0 Framework
 RUN apt-key update && \
