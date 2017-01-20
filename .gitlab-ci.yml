@@ -40,7 +40,7 @@ test:caching:
     - docker-compose down -v --remove-orphans
 
 test:db:
-  stage: test
+  stage: test-db
   script:
     - export COMPOSE_PROJECT_NAME=${ISOLATION}db
     - docker-compose up -d
@@ -48,7 +48,7 @@ test:db:
     - docker-compose down -v --remove-orphans
 
 test:db:mysql:
-  stage: test
+  stage: test-db
   script:
     - export COMPOSE_PROJECT_NAME=${ISOLATION}mysql
     - docker-compose up -d
@@ -58,7 +58,7 @@ test:db:mysql:
     - docker-compose down -v --remove-orphans
 
 test:db:pgsql:
-  stage: test
+  stage: test-db
   script:
     - export COMPOSE_PROJECT_NAME=${ISOLATION}pgsql
     - docker-compose up -d
@@ -68,7 +68,7 @@ test:db:pgsql:
     - docker-compose down -v --remove-orphans
 
 test:db:mssql:
-  stage: test
+  stage: test-db
   only:
     - tests/mssql
   script:
@@ -85,7 +85,7 @@ test:db:mssql:
     - docker-compose down -v --remove-orphans
 
 test:db:cubrid:
-  stage: test
+  stage: test-db
   only:
     - tests/cubrid
   script:
