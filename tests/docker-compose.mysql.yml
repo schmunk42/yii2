@@ -6,8 +6,7 @@ services:
       - mysql
 
   mysql:
-    image: percona:5.7
-    #image: mysql:5.7
+    image: ${DOCKER_MYSQL_IMAGE}
     environment:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=yiitest

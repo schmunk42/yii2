@@ -7,7 +7,7 @@ services:
       - postgres
 
   postgres:
-    image: postgres
+    image: ${DOCKER_POSTGRES_IMAGE}
     environment:
       - POSTGRES_DB=yiitest
       - POSTGRES_USER=postgres
