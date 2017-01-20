@@ -44,6 +44,8 @@ db:
 
 mysql:
   stage: test
+  only:
+    - tests/mysql
   script:
     - export COMPOSE_FILE=docker-compose.yml:docker-compose.${CI_BUILD_NAME}.yml
     - docker-compose up --build -d
