@@ -2,73 +2,69 @@ before_script:
   # run docker-compose commands from tests environment
   - cd tests
   # set stack isolation
-  - export ISOLATION=buildpipeline${CI_PIPELINE_ID}
+  - export ISOLATION=buildpipeline${CI_PIPELINE_ID}${CI_BUILD_NAME}
   - export COMPOSE_PROJECT_NAME=${ISOLATION}
   - export TUPLE_C=$(expr ${CI_BUILD_ID} % 99)
   - echo ${TUPLE_C}
 
 after_script:
-  - export ISOLATION=buildpipeline${CI_PIPELINE_ID}
+  - export ISOLATION=buildpipeline${CI_PIPELINE_ID}${CI_BUILD_NAME}
+  - export COMPOSE_PROJECT_NAME=${ISOLATION}
   - docker ps -f name=${ISOLATION}
+  - docker-compose down -v --remove-orphans
 
 stages:
-  - build
+  - travis
   - test
-  - test-db
   - cleanup
-
-build:
-  stage: build
-  script:
-    - docker-compose build
 
 test:
   stage: test
   script:
-    - docker-compose up -d
+    - docker-compose up --build -d
     - docker-compose run --rm php vendor/bin/phpunit -v --exclude caching,db,data --log-junit tests/_junit/test.xml
-    - docker-compose down -v --remove-orphans
 
-test:caching:
+caching:
   stage: test
   script:
-    - export COMPOSE_PROJECT_NAME=${ISOLATION}caching
-    - docker-compose up -d
+    - export COMPOSE_FILE=docker-compose.yml:docker-compose.${CI_BUILD_NAME}.yml
+    - docker-compose up --build -d
     # wait for mysql (retry 30 times)
     - docker-compose run --rm php bash -c "while ! curl mysql:3306; do ((c++)) && ((c==30)) && break; sleep 2; done"
-    - docker-compose run --rm php vendor/bin/phpunit -v --group caching
-    - docker-compose down -v --remove-orphans
+    - docker-compose run --rm php vendor/bin/phpunit -v --group caching --exclude db
 
-test:db:
-  stage: test-db
+db:
+  stage: test
   script:
     - export COMPOSE_PROJECT_NAME=${ISOLATION}db
-    - docker-compose up -d
+    - docker-compose up --build -d
     - docker-compose run --rm php vendor/bin/phpunit -v --group db --exclude caching,mysql,pgsql,mssql,cubrid
     - docker-compose down -v --remove-orphans
 
-test:db:mysql:
-  stage: test-db
+mysql:
+  stage: test
   script:
     - export COMPOSE_PROJECT_NAME=${ISOLATION}mysql
-    - docker-compose up -d
+    - export COMPOSE_FILE=docker-compose.yml:docker-compose.${CI_BUILD_NAME}.yml
+    - docker-compose up --build -d
     # wait for db (retry X times)
     - docker-compose run --rm php bash -c "while ! curl mysql:3306; do ((c++)) && ((c==30)) && break; sleep 2; done"
     - docker-compose run --rm php vendor/bin/phpunit -v --group mysql
     - docker-compose down -v --remove-orphans
 
-test:db:pgsql:
-  stage: test-db
+pgsql:
+  stage: test
   script:
     - export COMPOSE_PROJECT_NAME=${ISOLATION}pgsql
-    - docker-compose up -d
+    - export COMPOSE_FILE=docker-compose.yml:docker-compose.${CI_BUILD_NAME}.yml
+    - docker-compose up --build -d
     # wait for db (retry X times)
     - docker-compose run --rm php bash -c 'while [ true ]; do curl postgres:5432; if [ $? == 52 ]; then break; fi; ((c++)) && ((c==25)) && break; sleep 2; done'
     - docker-compose run --rm php vendor/bin/phpunit -v --group pgsql
     - docker-compose down -v --remove-orphans
 
-test:db:mssql:
-  stage: test-db
+mssql:
+  stage: test
   only:
     - tests/mssql
   script:
@@ -84,8 +80,8 @@ test:db:mssql:
     - docker-compose run --rm php vendor/bin/phpunit -v --group mssql
     - docker-compose down -v --remove-orphans
 
-test:db:cubrid:
-  stage: test-db
+cubrid:
+  stage: test
   only:
     - tests/cubrid
   script:
@@ -98,18 +94,19 @@ test:db:cubrid:
     - docker-compose run --rm php /project/vendor/bin/phpunit -v --group cubrid
     - docker-compose down -v --remove-orphans
 
-test:travis:
-  stage: test
+travis:
+  stage: travis
   only:
     - travis
   script:
     - export COMPOSE_PROJECT_NAME=${ISOLATION}travis
-    - docker-compose up -d
+    - docker-compose up --build -d
     # TODO: retry/wait for db
     - sleep 10
     - docker-compose run --rm php vendor/bin/phpunit -v --exclude mssql,cubrid,oci,wincache,xcache,zenddata,cubrid
     - docker-compose down -v --remove-orphans
 
+# temporary cleanup stage
 cleanup:
   stage: cleanup
   when: always

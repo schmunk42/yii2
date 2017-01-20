@@ -1,0 +1,16 @@
+version: '2'
+services:
+
+  php:
+    depends_on:
+      - mysql
+
+  mysql:
+    image: percona:5.7
+    #image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=yiitest
+      - MYSQL_USER=travis
+      - MYSQL_PASSWORD=travis
+

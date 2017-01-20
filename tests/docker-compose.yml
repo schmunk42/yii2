@@ -4,9 +4,6 @@ services:
   php:
     build: ..
     working_dir: /project
-    depends_on:
-      - postgres
-      - mysql
     #volumes:
       # Enable for debugging, enabling tests might be slow for file access (data) on host-volume
       #- ../tests:/project/tests
@@ -14,28 +11,6 @@ services:
     # Tmpfs volume (experimental)
     tmpfs:
       - /project/tests/runtime
-
-  mysql:
-    image: percona:5.7
-    #image: mysql:5.7
-    environment:
-      - MYSQL_ROOT_PASSWORD=secret
-      - MYSQL_DATABASE=yiitest
-      - MYSQL_USER=travis
-      - MYSQL_PASSWORD=travis
-
-  postgres:
-    image: postgres
-    environment:
-      - POSTGRES_DB=yiitest
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-
-  redis:
-    image: redis
-
-  memcached:
-    image: memcached
 
 networks:
   default:
