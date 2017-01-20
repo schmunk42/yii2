@@ -8,12 +8,16 @@ services:
       - postgres
       - mysql
     #volumes:
-      # Enable for debugging
+      # Enable for debugging, enabling tests might be slow for file access (data) on host-volume
       #- ../tests:/project/tests
       # - ../framework:/project/framework
+    # Tmpfs volume (experimental)
+    tmpfs:
+      - /project/tests/runtime
 
   mysql:
     image: percona:5.7
+    #image: mysql:5.7
     environment:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=yiitest
