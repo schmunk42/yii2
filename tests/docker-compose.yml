@@ -6,6 +6,8 @@ services:
     working_dir: /project
     volumes:
       - ../tests/data/config-docker.php:/project/tests/data/config.php
+      # Test reports
+      - ../tests/_log:/project/tests/_log
       # Enable for debugging, enabling tests might be slow for file access (data) on host-volume
       #- ../tests:/project/tests
       # - ../framework:/project/framework

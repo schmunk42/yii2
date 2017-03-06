@@ -27,7 +27,10 @@ test:
   stage: test
   script:
     - docker-compose up --build -d
-    - docker-compose run --rm php vendor/bin/phpunit -v --exclude caching,db,data --log-junit tests/_junit/test.xml
+    - docker-compose run --rm php vendor/bin/phpunit -v --exclude caching,db,data --log-junit tests/_log/test.xml
+  artifacts:
+    when: always
+    path: tests/_log
 
 caching:
   stage: test
