@@ -307,7 +307,7 @@ EOD;
         if (in_array($this->config['format'], ['php', 'po'])) {
             foreach ($this->config['languages'] as $language) {
                 $dir = $this->config['messagePath'] . DIRECTORY_SEPARATOR . $language;
-                if (!is_dir($dir) && !@mkdir($dir)) {
+                if (!is_dir($dir) && !FileHelper::createDirectory($dir)) {
                     throw new Exception("Directory '{$dir}' can not be created.");
                 }
                 if ($this->config['format'] === 'po') {

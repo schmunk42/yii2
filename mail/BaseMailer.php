@@ -11,6 +11,7 @@ use Yii;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use yii\base\ViewContextInterface;
+use yii\helpers\FileHelper;
 use yii\web\View;
 
 /**
@@ -324,7 +325,7 @@ abstract class BaseMailer extends Component implements MailerInterface, ViewCont
     {
         $path = Yii::getAlias($this->fileTransportPath);
         if (!is_dir($path)) {
-            mkdir($path, 0777, true);
+            FileHelper::createDirectory($path, 0777, true);
         }
         if ($this->fileTransportCallback !== null) {
             $file = $path . '/' . call_user_func($this->fileTransportCallback, $this, $message);
